@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Calculator</title>
+  </head>
+    <body bgcolor= "#0000" text= "gold">
+  	<form name="calculator" >
+  		<table>
+  			<tr>
+  				<td>
+  					<input type="button" value="1" onClick="document.calculator.ans.value+='1'">
+  				</td>
+  				<td>
+  					<input type="button" value="2" onClick="document.calculator.ans.value+='2'">
+  				</td>
+  				<td>
+  					<input type="button" value="3" onClick="document.calculator.ans.value+='3'">
+  				</td>
+  				<td>
+  					<input type="button" value="+" onClick="document.calculator.ans.value+='+'">
+  				</td>
+  			</tr>
+  			<tr>
+  				<td>
+  					<input type="button" value="4" onClick="document.calculator.ans.value+='4'">
+  				</td>
+  				<td>
+  					<input type="button" value="5" onClick="document.calculator.ans.value+='5'">
+  				</td>
+  				<td>
+  					<input type="button" value="6" onClick="document.calculator.ans.value+='6'">
+  				</td>
+  				<td>
+  					<input type="button" value="-" onClick="document.calculator.ans.value+='-'">
+  				</td>
+  			</tr>
+  			<tr>
+  				<td>
+  					<input type="button" value="7" onClick="document.calculator.ans.value+='7'">
+  				</td>
+  				<td>
+  					<input type="button" value="8" onClick="document.calculator.ans.value+='8'">
+  				</td>
+  				<td>
+  					<input type="button" value="9" onClick="document.calculator.ans.value+='9'">
+  				</td>
+  				<td>
+  					<input type="button" value="*" onClick="document.calculator.ans.value+='*'">
+  				</td>
+  			</tr>
+  			<tr>
+  				<td>
+  					<input type="button" value="0" onClick="document.calculator.ans.value+='0'">
+  				</td>
+  				<td>
+  					<input type="reset" value="C">
+  				</td>
+  				<td>
+  					<input type="button" value="="  onClick="document.calculator.ans.value=evaluate(document.calculator.ans.value)">
+  				</td>
+  				<td>
+  					<input type="button" value="/" onClick="document.calculator.ans.value+='/'">
+  				</td>
+  			</tr>
+  		<tr>
+  			<td colspan="4">Solution is</td>
+  		</tr>
+  		<tr>
+  			<td colspan="4">
+  				<input type="textfield" name="ans" value="">
+  			</td>
+  		</tr>
+  	</table>
+  	</form>
+    <script type="text/javascript">
+    function evaluate(str) {
+      console.log(str);
+      //split function
+      function splitString(str) {
+        var index = 0;
+        var splitArray = str.split("").reduce((arr, v, i) => {
+          if (isNaN(parseInt(v))) {
+            arr.push(str.slice(index, i));
+            arr.push(v);
+            index = i + 1;
+          }
+          return arr;
+        }, []);
+        splitArray.push(str.slice(index));
+      //console.log(splitArray);
+        return splitArray;
+      }
+      //Operand function
+      function findMultIndex(arr) {
+        return arr.findIndex(i => i == "*");
+      }
+
+      function findDivIndex(arr) {
+        return arr.findIndex(i => i == "/");
+      }
+
+      function findAddIndex(arr) {
+        return arr.findIndex(i => i == "+");
+      }
+
+      function findSubIndex(arr) {
+        return arr.findIndex(i => i == "-");
+      }
+      //operation Function
+      function multiply(arr) {
+        var index = findMultIndex(arr);
+        arr[index] = parseInt(arr[index - 1]) * parseInt(arr[index + 1]);
+      //console.log(parseInt(arr[index-1]));
+        return arr.filter((c, i) => {
+          return i !== index - 1 && i !== index + 1;
+        });
+      }
+
+      function divide(arr) {
+        var index = findDivIndex(arr);
+        arr[index] = parseInt(arr[index - 1]) / parseInt(arr[index + 1]);
+        return arr.filter((c, i) => {
+          return i !== index - 1 && i !== index + 1;
+        });
+      }
+
+      function add(arr) {
+        var index = findAddIndex(arr);
+        arr[index] = parseInt(arr[index - 1]) + parseInt(arr[index + 1]);
+        return arr.filter((c, i) => {
+          return i !== index - 1 && i !== index + 1;
+        });
+      }
+
+      function subtract(arr) {
+        var index = findSubIndex(arr);
+        arr[index] = parseInt(arr[index - 1]) - parseInt(arr[index + 1]);
+        return arr.filter((c, i) => {
+          return i !== index - 1 && i !== index + 1;
+        });
+      }
+      // Priority operation
+      function containsMultOrDiv(arr) {
+        return arr.some(i => i === "*" || i === "/");
+      }
+
+      function containsAddOrSub(arr) {
+        return arr.some(i => i === "+" || i === "-");
+      }
+
+      function simplify(arr) {
+        while (containsMultOrDiv(arr)) {
+          if (arr.includes("*")) {
+        if (arr.includes("/")) {
+            if (findDivIndex(arr) < findMultIndex(arr)) {
+            arr = divide(arr);
+            } else {
+            arr = multiply(arr);
+            }
+        } else {
+          arr = multiply(arr);
+        }
+          } else {
+        arr = divide(arr);
+          }
+        }
+        while (containsAddOrSub(arr)) {
+          if (arr.includes("+")) {
+        if (arr.includes("-")) {
+            if (findSubIndex(arr) < findAddIndex(arr)) {
+              arr = subtract(arr);
+            } else {
+              arr = add(arr);
+            }
+        } else {
+            arr = add(arr);
+        }
+          } else {
+        arr = subtract(arr);
+          }
+        }
+      console.log(parseInt(arr));
+      //$('input[name=ans]').val(parseInt(arr));
+       //$('#ans').val(parseInt(arr));
+        // return parseInt(arr);
+      }
+      var arithmeticArray = splitString(str);
+      return simplify(arithmeticArray);
+    }
+    //for inside script tag checking
+    var str = "10-9+6*3/2";
+    evaluate(str);
+    </script>
+  </body>
+</html>
